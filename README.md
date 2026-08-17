@@ -4,7 +4,7 @@ A production-oriented monorepo for an autonomous personal AI employee: it turns 
 
 ## Current status
 
-Phase 1 (architecture and repository structure) is complete. The repository currently defines service boundaries, local infrastructure, configuration contracts, and engineering conventions. Application behavior will be added incrementally in later phases.
+Phases 1 and 2 are complete: repository architecture, a typed FastAPI foundation, async database access, the initial PostgreSQL/pgvector schema, Alembic migrations, health probes, and backend container wiring.
 
 ## Architecture
 
@@ -48,7 +48,7 @@ docs/                     architecture and engineering decisions
 2. Start infrastructure with `docker compose up -d postgres redis`.
 3. Check it with `docker compose ps`.
 
-The `api`, `worker`, `scheduler`, and `frontend` profiles are intentionally not enabled until their foundations are implemented in Phases 2 and 4. PostgreSQL is available on `localhost:5432`; Redis is available on `localhost:6379`.
+PostgreSQL is available on `localhost:5432`; Redis is available on `localhost:6379`. After creating `.env`, start the Phase 2 API with `docker compose --profile backend up --build`.
 
 Stop local services with `docker compose down`. Add `-v` only when you deliberately want to erase local database and Redis data.
 
@@ -59,7 +59,7 @@ Stop local services with `docker compose down`. Add `-v` only when you deliberat
 ## Delivery roadmap
 
 1. Repository architecture (complete)
-2. Database and backend foundation
+2. Database and backend foundation (complete)
 3. Authentication and sessions
 4. Chat interface
 5. Agent runtime and provider abstraction
