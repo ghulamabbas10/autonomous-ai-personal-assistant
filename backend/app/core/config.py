@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AnyHttpUrl, Field, SecretStr, field_validator
+from pydantic import AnyHttpUrl, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     api_base_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8000")
     log_level: str = "INFO"
     database_url: str = "postgresql+asyncpg://assistant:change-me@localhost:5432/assistant"
+    redis_url: str = "redis://localhost:6379/0"
     session_secret: SecretStr = SecretStr("development-only-change-me-please")
     data_encryption_key: SecretStr = SecretStr("development-only-change-me")
     default_daily_budget_usd: float = Field(default=5.0, ge=0)
@@ -28,6 +29,11 @@ class Settings(BaseSettings):
     max_tool_calls_per_run: int = Field(default=50, ge=1, le=10_000)
     max_task_duration_seconds: int = Field(default=7_200, ge=1)
     default_timezone: str = "UTC"
+    session_ttl_hours: int = Field(default=168, ge=1, le=24 * 90)
+    auth_rate_limit_attempts: int = Field(default=5, ge=1, le=100)
+    auth_rate_limit_window_seconds: int = Field(default=900, ge=1, le=86_400)
+    session_cookie_name: str = "assistant_session"
+    csrf_cookie_name: str = "assistant_csrf"
 
     @field_validator("log_level")
     @classmethod
@@ -43,6 +49,19 @@ class Settings(BaseSettings):
         if not value.startswith(("postgresql+asyncpg://", "sqlite+aiosqlite://")):
             raise ValueError("DATABASE_URL must use asyncpg or aiosqlite")
         return value
+
+    @model_validator(mode="after")
+    def reject_placeholder_production_secrets(self) -> "Settings":
+        if self.app_env != "production":
+            return self
+        for name, secret in (
+            ("SESSION_SECRET", self.session_secret.get_secret_value()),
+            ("DATA_ENCRYPTION_KEY", self.data_encryption_key.get_secret_value()),
+        ):
+            lowered = secret.casefold()
+            if len(secret) < 32 or "replace" in lowered or "development" in lowered:
+                raise ValueError(f"{name} must be a non-placeholder secret in production")
+        return self
 
 
 @lru_cache

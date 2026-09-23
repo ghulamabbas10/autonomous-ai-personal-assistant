@@ -5,6 +5,7 @@ from app.database.base import Base
 def test_required_tables_are_registered() -> None:
     required = {
         "users",
+        "user_sessions",
         "conversations",
         "messages",
         "projects",

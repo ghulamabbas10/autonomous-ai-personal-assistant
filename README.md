@@ -4,7 +4,7 @@ A production-oriented monorepo for an autonomous personal AI employee: it turns 
 
 ## Current status
 
-Phases 1 and 2 are complete: repository architecture, a typed FastAPI foundation, async database access, the initial PostgreSQL/pgvector schema, Alembic migrations, health probes, and backend container wiring.
+Phases 1–3 are complete: repository architecture, the FastAPI/database foundation, and secure database-backed authentication.
 
 ## Architecture
 
@@ -60,7 +60,7 @@ Stop local services with `docker compose down`. Add `-v` only when you deliberat
 
 1. Repository architecture (complete)
 2. Database and backend foundation (complete)
-3. Authentication and sessions
+3. Authentication and sessions (complete)
 4. Chat interface
 5. Agent runtime and provider abstraction
 6. Planner and task engine
