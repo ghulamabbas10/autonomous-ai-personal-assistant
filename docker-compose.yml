@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    profiles: ["backend"]
+    profiles: ["backend", "frontend"]
     build:
       context: ./backend
       dockerfile: ../infrastructure/docker/backend.Dockerfile
@@ -45,7 +45,7 @@ services:
     restart: "no"
 
   api:
-    profiles: ["backend"]
+    profiles: ["backend", "frontend"]
     build:
       context: ./backend
       dockerfile: ../infrastructure/docker/backend.Dockerfile
@@ -60,6 +60,27 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    profiles: ["frontend"]
+    build:
+      context: ./frontend
+      dockerfile: ../infrastructure/docker/frontend.Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:8000
+    environment:
+      API_INTERNAL_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:3000/login"]
       interval: 10s
       timeout: 5s
       retries: 10
