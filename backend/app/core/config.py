@@ -34,6 +34,14 @@ class Settings(BaseSettings):
     auth_rate_limit_window_seconds: int = Field(default=900, ge=1, le=86_400)
     session_cookie_name: str = "assistant_session"
     csrf_cookie_name: str = "assistant_csrf"
+    llm_provider: Literal["mock", "ollama"] = "mock"
+    llm_model: str = "mock-v1"
+    llm_api_key: SecretStr = SecretStr("")
+    llm_base_url: AnyHttpUrl = AnyHttpUrl("http://host.docker.internal:11434")
+    llm_timeout_seconds: int = Field(default=120, ge=1, le=600)
+    llm_max_context_messages: int = Field(default=20, ge=2, le=200)
+    llm_max_input_characters: int = Field(default=20_000, ge=100, le=1_000_000)
+    embedding_model: str = "nomic-embed-text"
 
     @field_validator("log_level")
     @classmethod

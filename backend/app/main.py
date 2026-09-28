@@ -4,7 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from redis.asyncio import Redis
 
+from app.agents import ConversationalAgent
+from app.agents.providers.factory import create_llm_provider
 from app.api.routes.auth import router as auth_router
+from app.api.routes.chat import router as chat_router
 from app.api.routes.health import router as health_router
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
@@ -16,11 +19,15 @@ def create_app(
     settings: Settings | None = None,
     database: Database | None = None,
     rate_limiter: RateLimiter | None = None,
+    agent: ConversationalAgent | None = None,
 ) -> FastAPI:
     resolved_settings = settings or get_settings()
     resolved_database = database or Database(resolved_settings)
     resolved_rate_limiter = rate_limiter or RedisRateLimiter(
         Redis.from_url(resolved_settings.redis_url, decode_responses=True)
+    )
+    resolved_agent = agent or ConversationalAgent(
+        create_llm_provider(resolved_settings), resolved_settings
     )
 
     @asynccontextmanager
@@ -28,7 +35,9 @@ def create_app(
         app.state.settings = resolved_settings
         app.state.database = resolved_database
         app.state.rate_limiter = resolved_rate_limiter
+        app.state.agent = resolved_agent
         yield
+        await resolved_agent.close()
         await resolved_rate_limiter.close()
         await resolved_database.dispose()
 
@@ -42,6 +51,7 @@ def create_app(
     )
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
+    app.include_router(chat_router, prefix="/api/v1")
     return app
 
 

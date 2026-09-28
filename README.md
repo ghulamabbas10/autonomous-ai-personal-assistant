@@ -4,7 +4,7 @@ A production-oriented monorepo for an autonomous personal AI employee: it turns 
 
 ## Current status
 
-Phases 1–4 are complete: repository architecture, the FastAPI/database foundation, secure database-backed authentication, and the responsive Next.js chat interface.
+Phases 1–5 are complete: repository architecture, the FastAPI/database foundation, secure authentication, the responsive Next.js interface, and provider-neutral persistent AI chat.
 
 ## Architecture
 
@@ -62,7 +62,7 @@ Stop local services with `docker compose down`. Add `-v` only when you deliberat
 2. Database and backend foundation (complete)
 3. Authentication and sessions (complete)
 4. Chat interface (complete)
-5. Agent runtime and provider abstraction
+5. Agent runtime and provider abstraction (complete)
 6. Planner and task engine
 7. Background workers
 8. Scheduler

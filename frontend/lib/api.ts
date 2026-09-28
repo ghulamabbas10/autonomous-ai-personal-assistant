@@ -1,4 +1,4 @@
-import type { AuthenticationResponse, User } from "@/lib/types";
+import type { AuthenticationResponse, ChatResponse, Conversation, ConversationDetail, User } from "@/lib/types";
 
 interface ApiErrorBody {
   detail?: string | Array<{ msg?: string }>;
@@ -40,6 +40,17 @@ export const authApi = {
     method: "POST",
     headers: { "X-CSRF-Token": csrfToken },
   }),
+};
+
+export const chatApi = {
+  list: () => request<Conversation[]>("/chat/conversations"),
+  get: (conversationId: string) => request<ConversationDetail>(`/chat/conversations/${conversationId}`),
+  send: (content: string, conversationId: string | null, csrfToken: string) =>
+    request<ChatResponse>("/chat", {
+      method: "POST",
+      headers: { "X-CSRF-Token": csrfToken },
+      body: JSON.stringify({ content, conversation_id: conversationId }),
+    }),
 };
 
 export function getCsrfCookie(): string {

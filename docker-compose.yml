@@ -32,6 +32,20 @@ services:
       retries: 10
     restart: unless-stopped
 
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:0.12.3
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   migrate:
     profiles: ["backend", "frontend"]
     build:
@@ -89,3 +103,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  ollama_data:

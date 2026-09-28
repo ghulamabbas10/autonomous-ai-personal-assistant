@@ -38,3 +38,22 @@ Package boundaries are documented in `docs/architecture.md`.
 - `POST /api/v1/auth/logout` with the `X-CSRF-Token` header
 
 Registration and login return the CSRF token and set the opaque HTTP-only session cookie. Production and staging environments additionally mark authentication cookies as `Secure`.
+## AI providers
+
+`LLM_PROVIDER=mock` is the default and makes deterministic responses without network access or cost. For a real free local model, run Ollama and configure:
+
+```dotenv
+LLM_PROVIDER=ollama
+LLM_MODEL=qwen2.5:3b
+LLM_BASE_URL=http://ollama:11434
+```
+
+Then start the `ollama` Compose profile and pull the model:
+
+```bash
+docker compose --profile frontend --profile ollama up -d
+docker compose exec ollama ollama pull qwen2.5:3b
+docker compose --profile frontend up -d --force-recreate api
+```
+
+The provider contract supports normal generation, streaming, schema-constrained generation, and embeddings. Chat requests are persisted through `POST /api/v1/chat`; conversation reads are user-scoped.
